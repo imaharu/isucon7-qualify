@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ISUCON7 予選問題
 ====
 
@@ -163,3 +164,6 @@ systemd に置く設定ファイルなどは files/ ディレクトリから探�
 - なんちゃって個人情報 http://kazina.com/dummy/
 - いらすとや http://www.irasutoya.com/
 - pixabay https://pixabay.com/
+=======
+# isucon7-qualify
+>>>>>>> d1eed94501816f59a838f6fc233395c1be59a620
