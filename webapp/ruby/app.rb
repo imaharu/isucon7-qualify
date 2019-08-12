@@ -229,7 +229,7 @@ class App < Sinatra::Base
       return redirect '/login', 303
     end
 
-    @channels, = get_channel_list_info
+    @channels = simple_get_channel_list_info
 
     user_name = params[:user_name]
     statement = db.prepare('SELECT * FROM user WHERE name = ?')
@@ -243,13 +243,13 @@ class App < Sinatra::Base
     @self_profile = user['id'] == @user['id']
     erb :profile
   end
-  
+
   get '/add_channel' do
     if user.nil?
       return redirect '/login', 303
     end
 
-    @channels, = get_channel_list_info
+    @channels = simple_get_channel_list_info
     erb :add_channel
   end
 
@@ -381,7 +381,7 @@ class App < Sinatra::Base
     row['last_insert_id']
   end
 
-  def get_channel_list_info(focus_channel_id = nil)
+  def get_channel_list_info(focus_channel_id)
     channels = db.query('SELECT * FROM channel ORDER BY id').to_a
     description = ''
     channels.each do |channel|
@@ -391,6 +391,10 @@ class App < Sinatra::Base
       end
     end
     [channels, description]
+  end
+
+  def simple_get_channel_list_info
+    channels = db.query('SELECT * FROM channel ORDER BY id').to_a
   end
 
   def ext2mime(ext)
