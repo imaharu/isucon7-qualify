@@ -305,7 +305,9 @@ class App < Sinatra::Base
     end
 
     if !avatar_name.nil? && !avatar_data.nil?
-      File.write(image_file_path(avatar_name), avatar_data)
+      statement = db.prepare('INSERT INTO image (name, data) VALUES (?, ?)')
+      statement.execute(avatar_name, avatar_data)
+      statement.close
       statement = db.prepare('UPDATE user SET avatar_icon = ? WHERE id = ?')
       statement.execute(avatar_name, user['id'])
       statement.close
@@ -320,15 +322,21 @@ class App < Sinatra::Base
     redirect '/', 303
   end
 
+  get '/icons/:file_name' do
+    file_name = params[:file_name]
+    statement = db.prepare('SELECT * FROM image WHERE name = ?')
+    row = statement.execute(file_name).first
+    statement.close
+    ext = file_name.include?('.') ? File.extname(file_name) : ''
+    mime = ext2mime(ext)
+    if !row.nil? && !mime.empty?
+      content_type mime
+      return row['data']
+    end
+    404
+  end
+
   private
-
-  def image_file_path(filename)
-    "#{public_path}/icons/#{filename}"
-  end
-
-  def public_path
-    @public_path ||= File.expand_path('../../public', __FILE__)
-  end
 
   def db
     return @db_client if defined?(@db_client)
@@ -387,5 +395,18 @@ class App < Sinatra::Base
 
   def simple_get_channel_list_info
     channels = db.query('SELECT * FROM channel ORDER BY id').to_a
+  end
+
+  def ext2mime(ext)
+    if ['.jpg', '.jpeg'].include?(ext)
+      return 'image/jpeg'
+    end
+    if ext == '.png'
+      return 'image/png'
+    end
+    if ext == '.gif'
+      return 'image/gif'
+    end
+    ''
   end
 end
