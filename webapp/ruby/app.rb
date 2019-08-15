@@ -87,7 +87,7 @@ class App < Sinatra::Base
 
   post '/login' do
     name = params[:name]
-    statement = db.prepare('SELECT * FROM user WHERE name = ?')
+    statement = db.prepare('SELECT * FROM user WHERE name = ? limit 1')
     row = statement.execute(name).first
     if row.nil? || row['password'] != Digest::SHA1.hexdigest(row['salt'] + params[:password])
       return 403
@@ -324,7 +324,7 @@ class App < Sinatra::Base
 
   get '/icons/:file_name' do
     file_name = params[:file_name]
-    statement = db.prepare('SELECT * FROM image WHERE name = ?')
+    statement = db.prepare('SELECT * FROM image WHERE name = ? limit 1')
     row = statement.execute(file_name).first
     statement.close
     ext = file_name.include?('.') ? File.extname(file_name) : ''
